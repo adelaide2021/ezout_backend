@@ -4,6 +4,9 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+/**
+ * Configuration properties for NATS connection.
+ */
 @Component
 @ConfigurationProperties(prefix = "nats")
 @Data
@@ -18,8 +21,5 @@ public class NatsProperties {
     private int reconnectWait = 2;
 
     private int connectionTimeout = 2;
-
-
-
 }
 

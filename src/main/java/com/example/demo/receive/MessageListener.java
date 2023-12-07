@@ -30,13 +30,17 @@
 //}
 package com.example.demo.receive;
 
+import com.example.demo.data.Message;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nats.client.Connection;
 import io.nats.client.ConnectionListener;
 import io.nats.client.Dispatcher;
 import org.springframework.web.socket.*;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class MessageListener implements ConnectionListener, WebSocketHandler {
@@ -57,10 +61,14 @@ public class MessageListener implements ConnectionListener, WebSocketHandler {
         Dispatcher dispatcher = conn.createDispatcher(msg -> {
             // Get real data
             byte[] realData = msg.getData();
-            System.out.println(realData.toString());
+            // System.out.println(realData.toString());
 
             // Send real data to the WebSocket
-            sendToWebSocket(realData);
+            try {
+                sendToWebSocket(realData);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
         });
 
         // Subscribe to messages with the subject "demo"
@@ -69,13 +77,16 @@ public class MessageListener implements ConnectionListener, WebSocketHandler {
         // Do not close the connection to test receiving messages multiple times
     }
 
-    private void sendToWebSocket(byte[] data) {
-        // Convert the byte array to a string and send it to the client
+    private void sendToWebSocket(byte[] data) throws JsonProcessingException {
         String realDataAsString = new String(data, StandardCharsets.UTF_8);
+        System.out.println("from receive, " + realDataAsString);
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Message> myObjects = objectMapper.readValue(realDataAsString, new TypeReference<List<Message>>() {});
+
         concurrentLinkedDeque.forEach(item -> {
             try {
                 if (item.isOpen()) {
-                    item.sendMessage(new TextMessage(realDataAsString));
+                    item.sendMessage(new TextMessage(objectMapper.writeValueAsString(myObjects)));
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);

@@ -77,12 +77,13 @@
                 category_id: document.getElementById('category_id').value,
                 basket_total: document.getElementById('basket_total').value
             };
+            const formDataArray = [formData];
             fetch('http://localhost:8080/api/sendmessage', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(formDataArray),
             })
                 .then(response => response.json())
                 .then(data => console.log(data))
