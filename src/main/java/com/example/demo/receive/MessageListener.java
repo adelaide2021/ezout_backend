@@ -68,7 +68,6 @@ public class MessageListener implements ConnectionListener, WebSocketHandler {
         Dispatcher dispatcher = conn.createDispatcher(msg -> {
             // Get real data
             byte[] realData = msg.getData();
-            // System.out.println(realData.toString());
 
             // Send real data to the WebSocket
             try {
@@ -83,7 +82,7 @@ public class MessageListener implements ConnectionListener, WebSocketHandler {
 
     private void sendToWebSocket(byte[] data) throws JsonProcessingException {
         String realDataAsString = new String(data, StandardCharsets.UTF_8);
-        System.out.println("from receive, " + realDataAsString);
+        System.out.println("receiving data on backend: " + realDataAsString);
 
         ObjectMapper objectMapper = new ObjectMapper();
         List<Message> myObjects = objectMapper.readValue(realDataAsString, new TypeReference<List<Message>>() {});

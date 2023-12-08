@@ -3,11 +3,8 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/demo
 nats:
-  # nats 地址
+  # nats address
   nats-urls: nats://39.97.255.141:4222
-  # 最大重连次数
   max-reconnect: 60
-  # 重连等待时间
   reconnect-wait: 2
-  # 连接超时时间
   connection-timeout: 2
