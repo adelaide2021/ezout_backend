@@ -37,17 +37,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nats.client.Connection;
 import io.nats.client.ConnectionListener;
 import io.nats.client.Dispatcher;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.Session;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.socket.*;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class MessageListener implements ConnectionListener, WebSocketHandler {
 
     private static final ConcurrentLinkedDeque<WebSocketSession> concurrentLinkedDeque = new ConcurrentLinkedDeque<>();
-    private String currentShopId = "1";
+    private volatile String currentShopId = "0";
 
     @Override
     public void connectionEvent(Connection conn, Events type) {
@@ -72,8 +79,6 @@ public class MessageListener implements ConnectionListener, WebSocketHandler {
         });
         // Subscribe to messages with the subject "demo"
         dispatcher.subscribe("demo.*");
-
-        // Do not close the connection to test receiving messages multiple times
     }
 
     private void sendToWebSocket(byte[] data) throws JsonProcessingException {
@@ -82,16 +87,11 @@ public class MessageListener implements ConnectionListener, WebSocketHandler {
 
         ObjectMapper objectMapper = new ObjectMapper();
         List<Message> myObjects = objectMapper.readValue(realDataAsString, new TypeReference<List<Message>>() {});
-
-        System.out.println("Action from receive line 85: " + myObjects.get(0).getAction());
-        if ("updateShopId".equals(myObjects.get(0).getAction())) {
-            // 如果消息类型是 updateShopId，则更新后端的 currentShopId
-            updateShopId(myObjects.get(0).getShop_id());
-            System.out.println("from receive test id, " + currentShopId);
-        }
         List<Message> filteredMessages = myObjects.stream()
                 .filter(message -> currentShopId.equals(message.getShop_id()))
                 .collect(Collectors.toList());
+        System.out.println("from lmsg lisner line 93, shop id:  " + currentShopId);
+        // System.out.println("from lmsg lisner line 94, shop id:  " + filteredMessages.get(0).toString());
         concurrentLinkedDeque.forEach(item -> {
             try {
                 if (item.isOpen()) {
@@ -103,10 +103,6 @@ public class MessageListener implements ConnectionListener, WebSocketHandler {
         });
     }
 
-    public void updateShopId(String newShopId) {
-        // 在从前端接收到新值时更新当前 shop_id
-        this.currentShopId = newShopId;
-    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -115,15 +111,22 @@ public class MessageListener implements ConnectionListener, WebSocketHandler {
 
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-        concurrentLinkedDeque.forEach(item -> {
-            try {
-                if (item.isOpen()) {
-                    item.sendMessage(message);
+        String payload = (String) message.getPayload();
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, String> messageMap = objectMapper.readValue(payload, new TypeReference<Map<String, String>>() {});
+
+            if (messageMap.containsKey("action") && messageMap.get("action").equals("updateShopId")) {
+                String newShopId = messageMap.get("shopId");
+                if (newShopId != null && !newShopId.isEmpty()) {
+                    currentShopId= newShopId;
+                    System.out.println("已更新 currentShopId 为：" + currentShopId);
                 }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
-        });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
