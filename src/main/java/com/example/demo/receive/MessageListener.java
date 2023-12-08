@@ -90,7 +90,7 @@ public class MessageListener implements ConnectionListener, WebSocketHandler {
         List<Message> filteredMessages = myObjects.stream()
                 .filter(message -> currentShopId.equals(message.getShop_id()))
                 .collect(Collectors.toList());
-        // System.out.println("shop id:  " + currentShopId);
+        System.out.println("shop id when sending message:  " + currentShopId);
         concurrentLinkedDeque.forEach(item -> {
             try {
                 if (item.isOpen()) {
@@ -120,7 +120,7 @@ public class MessageListener implements ConnectionListener, WebSocketHandler {
                 String newShopId = messageMap.get("shopId");
                 if (newShopId != null && !newShopId.isEmpty()) {
                     currentShopId= newShopId;
-                    // System.out.println("update currentShopId to be：" + currentShopId);
+                    System.out.println("update currentShopId to be：" + currentShopId);
                 }
             }
         } catch (IOException e) {
