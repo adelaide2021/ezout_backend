@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 public class MessageListener implements ConnectionListener, WebSocketHandler {
 
     private static final ConcurrentLinkedDeque<WebSocketSession> concurrentLinkedDeque = new ConcurrentLinkedDeque<>();
-    private volatile String currentShopId = "0";
+    private static String currentShopId = "";
 
     @Override
     public void connectionEvent(Connection conn, Events type) {
@@ -118,7 +118,8 @@ public class MessageListener implements ConnectionListener, WebSocketHandler {
             if (messageMap.containsKey("action") && messageMap.get("action").equals("updateShopId")) {
                 String newShopId = messageMap.get("shopId");
                 if (newShopId != null && !newShopId.isEmpty()) {
-                    currentShopId= newShopId;
+                    //currentShopId.set(newShopId);
+                    currentShopId = newShopId;
                     System.out.println("update currentShopId to be：" + currentShopId);
                 }
             }
