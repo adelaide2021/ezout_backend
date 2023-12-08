@@ -22,10 +22,12 @@ public class MessageSendController {
     @PostMapping
     public void submitMessage(@RequestBody List<Message> formData) throws InterruptedException {
         try {
-            System.out.println("from send, " + formData.toString());
-            // Convert List<Message> to JSON string
+            String shopID = formData.get(0).getShop_id();
+            System.out.println("fomr send: " + shopID);
             String jsonData = new ObjectMapper().writeValueAsString(formData);
-            natsConnection.publish("demo", jsonData.getBytes());
+            String topic = "demo." + shopID;
+            natsConnection.publish(topic, jsonData.getBytes());
+
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -38,25 +38,27 @@
         <form id="sendMessageForm">
             <label for="session_id">session_id:</label>
             <input type="text" id="session_id" name="session_id">
-            <label for="session_id">shop_id:</label>
+            <label for="shop_id">shop_id:</label>
             <input type="text" id="shop_id" name="shop_id">
-            <label for="session_id">shopper_id:</label>
+            <label for="shopper_id">shopper_id:</label>
             <input type="text" id="shopper_id" name="shopper_id">
-            <label for="session_id">action_id:</label>
+            <label for="action_id">action_id:</label>
             <input type="text" id="action_id" name="action_id">
-            <label for="session_id">create_time:</label>
+            <label for="create_time">create_time:</label>
             <input type="text" id="create_time" name="create_time">
-            <label for="session_id">action:</label>
+            <label for="action">action:</label>
             <input type="text" id="action" name="action">
-            <label for="session_id">product_name:</label>
+            <label for="product_name">product_name:</label>
             <input type="text" id="product_name" name="product_name">
-            <label for="session_id">product_id:</label>
+            <label for="product_id">product_id:</label>
             <input type="text" id="product_id" name="product_id">
-            <label for="session_id">UPC:</label>
-            <input type="text" id="UPC" name="UPC">
-            <label for="session_id">category_id:</label>
+            <label for="product_price">product_price:</label>
+            <input type="text" id="product_price" name="product_id">
+            <label for="upc">UPC:</label>
+            <input type="text" id="upc" name="upc">
+            <label for="category_id">category_id:</label>
             <input type="text" id="category_id" name="category_id">
-            <label for="session_id">basket_total:</label>
+            <label for="basket_total">basket_total:</label>
             <input type="text" id="basket_total" name="basket_total">
             <button type="button" onclick="handleSubmit()">Send Message</button>
         </form>
@@ -73,7 +75,9 @@
                 create_time: document.getElementById('create_time').value,
                 action: document.getElementById('action').value,
                 product_name: document.getElementById('product_name').value,
-                UPC: document.getElementById('UPC').value,
+                product_id: document.getElementById('product_id').value,
+                product_price: document.getElementById('product_price').value,
+                upc: document.getElementById('upc').value,
                 category_id: document.getElementById('category_id').value,
                 basket_total: document.getElementById('basket_total').value
             };

@@ -42,12 +42,12 @@ import org.springframework.web.socket.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.stream.Collectors;
 
 public class MessageListener implements ConnectionListener, WebSocketHandler {
 
     private static final ConcurrentLinkedDeque<WebSocketSession> concurrentLinkedDeque = new ConcurrentLinkedDeque<>();
-
-
+    private String currentShopId = "1";
 
     @Override
     public void connectionEvent(Connection conn, Events type) {
@@ -70,9 +70,8 @@ public class MessageListener implements ConnectionListener, WebSocketHandler {
                 throw new RuntimeException(e);
             }
         });
-
         // Subscribe to messages with the subject "demo"
-        dispatcher.subscribe("demo");
+        dispatcher.subscribe("demo.*");
 
         // Do not close the connection to test receiving messages multiple times
     }
@@ -80,18 +79,33 @@ public class MessageListener implements ConnectionListener, WebSocketHandler {
     private void sendToWebSocket(byte[] data) throws JsonProcessingException {
         String realDataAsString = new String(data, StandardCharsets.UTF_8);
         System.out.println("from receive, " + realDataAsString);
+
         ObjectMapper objectMapper = new ObjectMapper();
         List<Message> myObjects = objectMapper.readValue(realDataAsString, new TypeReference<List<Message>>() {});
 
+        System.out.println("Action from receive line 85: " + myObjects.get(0).getAction());
+        if ("updateShopId".equals(myObjects.get(0).getAction())) {
+            // 如果消息类型是 updateShopId，则更新后端的 currentShopId
+            updateShopId(myObjects.get(0).getShop_id());
+            System.out.println("from receive test id, " + currentShopId);
+        }
+        List<Message> filteredMessages = myObjects.stream()
+                .filter(message -> currentShopId.equals(message.getShop_id()))
+                .collect(Collectors.toList());
         concurrentLinkedDeque.forEach(item -> {
             try {
                 if (item.isOpen()) {
-                    item.sendMessage(new TextMessage(objectMapper.writeValueAsString(myObjects)));
+                    item.sendMessage(new TextMessage(objectMapper.writeValueAsString(filteredMessages)));
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    public void updateShopId(String newShopId) {
+        // 在从前端接收到新值时更新当前 shop_id
+        this.currentShopId = newShopId;
     }
 
     @Override
